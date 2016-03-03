@@ -1,1 +1,1 @@
-{"success":false,"errors":{"success":false,"errors":{"name":["The name field is required."]}}}
+{"success":false,"errors":[{"field":"name","error":"The name field is required."}]}
