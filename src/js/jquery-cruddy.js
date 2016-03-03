@@ -21,6 +21,7 @@
         id:           'input[name="id"]',
         limit:        '[name="limit"]',
         modal:        '#modal-create-edit',
+        refresh:      '.btn-refresh',
         pagination:   '.pagination > li > span',
         read:         'button[data-action="read"]',
         search:       '.search',
@@ -86,7 +87,6 @@
     this.settings = $.extend({}, defaults, options);
     this._defaults = defaults;
     this._name = pluginName;
-
     this.init();
   }
 
@@ -363,17 +363,13 @@
 
       validateLaravel: function(_this, data) {
         var plugin = this;
-        $(data.errors.errors).each(function (a, b) {
-          /* TO-DO: not ideal but laravel was funky with validation results */
-          var k = Object.keys(b)[0],
-            field = Object.keys(b)[0],
-            error = b[Object.keys(b)[0]][0];
-          _this.find('[name="' + field + '"]')
+        $(data.errors).each(function (i, errors) {
+          _this.find('[name="' + errors.field + '"]')
             .parents(plugin.style('form_group', '', true))
             .addClass(plugin.style('error','has_error'))
             .find(plugin.style('error','help_block', true))
             .removeClass(plugin.style('hide'))
-            .find(plugin.style('error','strong')).html(error);
+            .find(plugin.style('error','strong')).html(errors.error);
         });
       },
 
