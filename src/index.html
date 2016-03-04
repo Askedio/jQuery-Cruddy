@@ -185,8 +185,13 @@
 <script src="js/jquery-cruddy.js"></script>
 
 <script>
-  $('.container-user').cruddy();
+  $('.container-user').cruddy({
+      templates: {
+        create_edit:  $.templates("#create-edit"),
+        pagination:   $.templates("#list-pagination"),
+        row:          $.templates("#row-item")
+      }
+  });
 </script>
-
 </body>
 </html>

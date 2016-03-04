@@ -1,3 +1,9 @@
+/* TO-DO:
+ *
+ * cache selectors 
+ *
+*/
+
 ;
 (function ($, window, document, undefined) {
 
@@ -7,12 +13,12 @@
     defaults = {
       slug:           'users',
       validation:     'validateLaravel',
-      listtype:           'listLaravel',
+      listtype:       'listLaravel',
 
       templates: {
-        create_edit:  $.templates("#create-edit"),
-        pagination:   $.templates("#list-pagination"),
-        row:          $.templates("#row-item")
+        create_edit:  '#create-edit',
+        pagination:   '#list-pagination',
+        row:          '#row-item'
       },
 
       selectors: {
@@ -91,19 +97,19 @@
   }
 
   $.extend(Plugin.prototype, {
-    // start plugin
+    /* start plugin */
       init: function () {
         this.localSettings();
         this.localStorage();
         this.$element = $(this.element);
-        this.bindEvents();
-        this.render();
+        this.bindEvents().render();
       },
 
       localSettings: function () {
         this.alert_timeout = false;
         this.list_url = $(this.element).find(this.settings.selectors.table).attr('data-url');
         this.default_list_url = $(this.element).find(this.settings.selectors.table).attr('data-url');
+        return this;
       },
 
       localStorage: function () {
@@ -119,105 +125,100 @@
           $(this.element).find(this.settings.selectors.limit).val(this.settings.list.limit);
         }
         if (this.getLocalStorage('list_url')) this.list_url = this.getLocalStorage('list_url');
+        return this;
       },
 
       bindEvents: function () {
         var plugin = this;
-        // refresh
+        /* refresh */
         this.$element.on('click', plugin.settings.selectors.refresh, function (e) {
           plugin.refresh.call(plugin, $(this));
         });
 
-        // pagination
+        /* pagination */
         $(this.element).on('click', plugin.settings.selectors.pagination, function (e) {
           plugin.pagination.call(plugin, $(this));
         });
 
-        // limit
+        /* limit */
         $(this.element).on('change', plugin.settings.selectors.limit, function (e) {
           e.preventDefault();
           plugin.limit.call(plugin, $(this));
         });
 
-        // search
+        /* search */
         $(this.element).on('submit', plugin.settings.selectors.search, function (e) {
           e.preventDefault();
           plugin.search.call(plugin, $(this));
         });
 
-        // sort
+        /* sort */
         $(this.element).on('click', plugin.settings.selectors.sort, function () {
           plugin.sort.call(plugin, $(this));
         });
 
-        // create
+        /* create */
         $(this.element).on('click', plugin.settings.selectors.create, function (e) {
           e.preventDefault();
           plugin.create.call(plugin, $(this));
         });
 
-        // read
+        /* read */
         $(this.element).on('click', plugin.settings.selectors.read, function (e) {
           e.preventDefault();
           plugin.read.call(plugin, $(this));
         });
 
-        // update
+        /* update */
         $(this.element).on('submit', plugin.settings.selectors.update, function (e) {
           e.preventDefault();
           plugin.update.call(plugin, $(this));
         });
 
-        // delete
+        /* delete */
         $(this.element).on('click', plugin.settings.selectors.del, function (e) {
           e.preventDefault();
           plugin.del.call(plugin, $(this));
         });
 
         this.callback('onBindEvents');
+        return this;
       },
 
       unbindEvents: function () {
         this.$element.off('.' + this._name);
+        return this;
       },
 
-    // bound events
+    /* bound events */
       refresh: function ($this) {
-        this.render();
-        this.callback('onRefresh');
+        this.render().callback('onRefresh');
+        return this;
       },
 
       pagination: function ($this) {
-        this.setUrl($this.attr('data-href'));
-        this.render();
-        this.callback('onPagination');
+        this.setUrl($this.attr('data-href')).render().callback('onPagination');
+        return this;
       },
 
       limit: function ($this) {
-        this.setUrl();
-        this.setLimit($this.val());
-        this.render();
-        this.callback('onLimit');
+        this.setUrl().setLimit($this.val()).render().callback('onLimit');
+        return this;
       },
 
       search: function ($this) {
-        this.setUrl();
-        this.setSearch($this.find(this.settings.selectors.search_field).val());
-        this.render();
-        this.callback('onSearch');
+        this.setUrl().setSearch($this.find(this.settings.selectors.search_field).val()).render().callback('onSearch');
+        return this;
       },
 
       sort: function ($this) {
-        this.setSort($this.attr('data-col'));
-        this.sortStyle($this, this.settings.list.direction);
-        this.setDirection(this.settings.list.direction == 'asc' ? 'desc' : 'asc');
-        this.render();
-        this.callback('onSort');
+        this.setSort($this.attr('data-col')).sortStyle($this, this.settings.list.direction).setDirection(this.settings.list.direction == 'asc' ? 'desc' : 'asc').render().callback('onSort');
+        return this;
       },
 
       create: function ($this) {
-        this.triggerCreate($this);
-        this.callback('onCreate');
+        this.triggerCreate($this).callback('onCreate');
+        return this;
       },
 
       read: function ($this) {
@@ -234,6 +235,7 @@
           }
         });
         this.callback('onRead');
+        return this;
       },
 
       update: function ($this) {
@@ -252,6 +254,7 @@
           }
         });
         this.callback('onUpdate');
+        return this;
       },
 
       del: function ($this) {
@@ -271,9 +274,10 @@
           });
         }
         this.callback('onDel');
+        return this;
       },
 
-    // plugin functions
+    /* plugin functions */
       callback: function (action) {
         if (typeof this.settings[action] === 'undefined') return false;
         var onComplete = this.settings[action];
@@ -291,9 +295,10 @@
         this.saveLocalStorage('search', this.settings.list.search)
         this.saveLocalStorage('list_url', this.list_url)
         this.callback('onSave');
+        return this;
       },
 
-    // visual
+    /* visual */
       style: function(base, sub, p) {
         var _style = sub 
                       ? this.settings.styles[base][sub]
@@ -304,13 +309,13 @@
       },
 
       success: function (message, target) {
-        this.alert(this.style('alert','alert_success'), message, target);
-        this.callback('onSuccess');
+        this.alert(this.style('alert','alert_success'), message, target).callback('onSuccess');
+        return this;
       },
 
       error: function (message, target) {
-        this.alert(this.style('alert','alert_danger'), message, target);
-        this.callback('onError');
+        this.alert(this.style('alert','alert_danger'), message, target).callback('onError');
+        return this;
       },
 
       alert: function (style, message, target) {
@@ -326,39 +331,46 @@
           _alert.hide();
         }, 3000);
         this.callback('onAlert');
+        return this;
       },
 
       loading: function () {
         $(this.element).find(this.style('refresh','btn_refresh', true)).find(this.style('em')).addClass(this.style('refresh','fa_spin'));
         this.callback('onLoading');
+        return this;
       },
 
       loaded: function () {
         $(this.element).find(this.style('refresh','btn_refresh', true)).find(this.style('em')).removeClass(this.style('refresh','fa_spin'));
         this.callback('onLoaded');
+        return this;
       },
 
       sortStyle: function (_this, direction) {
         _this.parents(this.style('thead')).find(this.style('sort', 'em', true)).removeClass(this.style('sort', 'sort_asc') + ' ' + this.style('sort', 'sort_desc')).addClass(this.style('sort', 'fa'));
         _this.find(this.style('sort', 'em', true)).removeClass(this.style('sort', 'fa')).addClass(this.style('sort', 'fa') +'-' + this.settings.list.direction);
         this.callback('onSortStyle');
+        return this;
       },
 
       renderTemplate: function (data) {
-        $(this.element).find(this.style('tbody')).html(this.settings.templates.row.render(data.results.data));
-        $(this.element).find(this.style('pagination')).html(this.settings.templates.pagination.render(data.results));
+        $(this.element).find(this.style('tbody')).html($.templates(this.settings.templates.row).render(data.results.data));
+        $(this.element).find(this.style('pagination', '', true)).html($.templates(this.settings.templates.pagination).render(data.results));
         this.callback('onRenderTemplate');
+        return this;
       },
 
       removeErrors: function (_this) {
         _this.find(this.style('error','has_error', true)).removeClass(this.style('error','has_error'));
         _this.find(this.style('error','has_error', true)).addClass(this.style('hide'));
         this.callback('onRemoveErrors');
+        return this;
       },
 
       validation: function (_this, data) {
         this[this.settings.validation](_this, data);
         this.callback('onValidation');
+        return this;
       },
 
       validateLaravel: function(_this, data) {
@@ -371,9 +383,16 @@
             .removeClass(plugin.style('hide'))
             .find(plugin.style('error','strong')).html(errors.error);
         });
+        return this;
       },
 
-    // helpers
+    /* helpers */
+      setting: function(base, sub){
+       return sub
+                      ? this.settings[base][sub]
+                      : this.settings[base];
+      },
+     
       render: function () {
         var $this = this;
         $.ajax({
@@ -396,18 +415,22 @@
           }
         });
         this.callback('onRender');
+        return this;
       },
 
       saveLocalStorage: function (vr, vl) {
         localStorage.setItem(this.settings.slug + '_' + vr, vl);
+        return this;
       },
 
       getLocalStorage: function (vr) {
         return localStorage.getItem(this.settings.slug + '_' + vr);
+        return this;
       },
 
       log: function (data) {
         this.callback('onLog');
+        return this;
       },
 
       processUpdate: function (_this, data) {
@@ -419,6 +442,7 @@
           this.validation(_this, data);
         } else if (data.errors) this.error(data.errors);
         this.callback('onProcessUpdate');
+        return this;
       },
 
       updateUrl: function (_this) {
@@ -452,36 +476,46 @@
         return _url;
       },
 
-    // setters
+    /* setters */
       setUrl: function (url) {
         this.list_url = url ? url : this.default_list_url;
+        return this;
       },
 
       setLimit: function (_limit) {
         this.settings.list.limit = _limit;
+        return this;
       },
 
       setSearch: function (_search) {
         this.settings.list.search = _search;
+        return this;
       },
 
       setSort: function (_sort) {
         this.settings.list.sort = _sort;
+        return this;
       },
 
       setDirection: function (_direction) {
         this.settings.list.direction = _direction;
+        return this;
       },
 
-    // triggers
+    /* triggers */
       triggerCreate: function (_this) {
-        $(this.element).find(this.settings.selectors.update).html(this.settings.templates.create_edit.render(this.settings.create));
-        this.callback('onTriggerCreate');
+        this.doCreateRead(this.setting('create')).callback('onTriggerCreate');
+        return this;
       },
 
       triggerRead: function (data) {
-        $(this.element).find(this.settings.selectors.update).html(this.settings.templates.create_edit.render(data.results));
-        this.callback('onTriggerRead');
+        this.doCreateRead(data.results).callback('onTriggerRead');
+        return this;
+      },
+
+      doCreateRead: function(data){
+        $(this.element).find(this.setting('selectors', 'update')).empty().html($.templates(this.setting('templates', 'create_edit')).render(data));
+        return this;
       }
 
   });
