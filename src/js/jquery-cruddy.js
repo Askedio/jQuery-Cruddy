@@ -437,7 +437,7 @@
         this.log(data);
         if (data.success == true) {
           this.render();
-          this.success(this.settings.lang.saved + ' ' + data.results.name, this.settings.selectors.modal)
+          this.success(this.settings.lang.saved, this.settings.selectors.modal)
         } else if (typeof data.errors == 'object') {
           this.validation(_this, data);
         } else if (data.errors) this.error(data.errors);
