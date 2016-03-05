@@ -268,7 +268,6 @@
             success: function (data) {
               plugin.log(data);
               if (data.success == true) {
-                $this.parent('tr').remove();
                 plugin.render().success(plugin.settings.lang.deleted)
               } else plugin.error(data.errors);
             }
