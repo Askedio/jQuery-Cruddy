@@ -16,6 +16,7 @@
       listtype:       'listLaravel',
 
       templates: {
+        noresults :  '#no-results',
         create_edit:  '#create-edit',
         pagination:   '#list-pagination',
         row:          '#row-item'
@@ -353,9 +354,10 @@
         return this;
       },
 
-      renderTemplate: function (data) {
-        $(this.element).find(this.style('tbody')).html($.templates(this.settings.templates.row).render(data.results.data));
-        $(this.element).find(this.style('pagination', '', true)).html($.templates(this.settings.templates.pagination).render(data.results));
+      renderTemplate: function (data, tpl) {
+        var _data = data ? data.results.data : false;
+        $(this.element).find(this.style('tbody')).html($.templates(tpl).render(_data));
+        if(_data) $(this.element).find(this.style('pagination', '', true)).html($.templates(this.settings.templates.pagination).render(data.results));
         this.callback('onRenderTemplate');
         return this;
       },
@@ -409,8 +411,11 @@
             $this.log(data.results);
 
             if (data.success == true) {
-              $this.renderTemplate(data);
-              $this.save();
+              console.log(data.results.total);
+              if(data.results.total > 0){
+                $this.renderTemplate(data, $this.settings.templates.row).save();
+              } else $this.renderTemplate(false, $this.settings.templates.noresults).save();
+              
             } else $this.error(data.errors);
           }
         });
