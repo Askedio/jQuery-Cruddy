@@ -227,7 +227,7 @@
         $.ajax({
           method: 'GET',
           url: $this.attr('data-href'),
-          dataType: 'jsonp',
+          dataType: 'json',
           success: function (data) {
             plugin.log(data);
             if (data.success == true) {
@@ -245,7 +245,7 @@
         $.ajax({
           method: _url.type,
           url: _url.url,
-          dataType: 'jsonp',
+          dataType: 'json',
           data: $this.serialize(),
           beforeSend: function () {
             plugin.removeErrors($this);
@@ -263,7 +263,7 @@
         if (confirm(this.settings.lang.confirm)) {
           $.ajax({
             url: $this.attr('data-href'),
-            dataType: 'jsonp',
+            dataType: 'json',
             type: 'DELETE',
             success: function (data) {
               plugin.log(data);
@@ -399,7 +399,7 @@
         $.ajax({
           method: 'GET',
           url: this.listUrl(),
-          dataType: 'jsonp',
+          dataType: 'json',
           beforeSend: function () {
             $this.loading();
           },
