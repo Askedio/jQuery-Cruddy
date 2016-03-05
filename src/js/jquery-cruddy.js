@@ -268,8 +268,8 @@
             success: function (data) {
               plugin.log(data);
               if (data.success == true) {
-                plugin.render();
-                plugin.success(plugin.settings.lang.deleted)
+                $this.parent('tr').remove();
+                plugin.render().success(plugin.settings.lang.deleted)
               } else plugin.error(data.errors);
             }
           });
