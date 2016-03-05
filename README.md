@@ -3,6 +3,13 @@ A CRUD plugin for jQuery &amp; Bootstrap to easily generate tables, create, and 
 
 ![Example](http://i.imgur.com/TY5cutl.png)
 
+# Usage
+~~~
+<script>
+ $('.container-user').cruddy();
+</script>
+~~~
+
 # Settings
 ~~~
 defaults = {
