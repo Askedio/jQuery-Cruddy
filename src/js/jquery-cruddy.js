@@ -14,6 +14,7 @@
       slug:           'users',
       validation:     'validateLaravel',
       listtype:       'listLaravel',
+      autofocus:      true,
 
       templates: {
         noresults :  '#no-results',
@@ -108,8 +109,8 @@
 
       localSettings: function () {
         this.alert_timeout = false;
-        this.list_url = $(this.element).find(this.settings.selectors.table).attr('data-url');
-        this.default_list_url = $(this.element).find(this.settings.selectors.table).attr('data-url');
+        this.list_url = $(this.element).find(this.settings.selectors.table).attr('data-href');
+        this.default_list_url = $(this.element).find(this.settings.selectors.table).attr('data-href');
         return this;
       },
 
@@ -129,6 +130,7 @@
         return this;
       },
 
+    /* bound event functions */
       bindEvents: function () {
         var plugin = this;
         /* refresh */
@@ -182,6 +184,10 @@
           plugin.del.call(plugin, $(this));
         });
 
+        $(this.element).on('shown.bs.modal', '.modal', function () {
+          plugin.autofocus(this);
+        });
+       
         this.callback('onBindEvents');
         return this;
       },
@@ -191,7 +197,15 @@
         return this;
       },
 
-    /* bound events */
+    /* bound event functions */
+
+      autofocus: function ($this) {
+        if(!this.settings.autofocus) return this;
+        setTimeout(function(){
+          $('input:text:visible:first', $this).focus();   
+        }, 200);
+        return this;
+      },
       refresh: function ($this) {
         this.render().callback('onRefresh');
         return this;
@@ -221,13 +235,18 @@
         this.triggerCreate($this).callback('onCreate');
         return this;
       },
-
+     
+    /* ajax calls */
+    /* TO-DO: combine to ajax helper */
       read: function ($this) {
         var plugin = this;
         $.ajax({
           method: 'GET',
           url: $this.attr('data-href'),
           dataType: 'json',
+          error: function (xhr) {
+            plugin.error(xhr.status, false, true);
+          },
           success: function (data) {
             plugin.log(data);
             if (data.success == true) {
@@ -241,12 +260,25 @@
 
       update: function ($this) {
         var plugin = this,
-          _url = this.updateUrl($this);
+          _url     = this.updateUrl($this),
+          _data    = $('input', $this).filter(function () {
+                        var _type = this.type;
+                        if(_type == 'text' || _type == 'textarea'){
+                          return this.value != this.defaultValue
+                        } else if(_type = 'select'){
+                          return this.value != this.defaultSelected
+                        } else if(_type = 'checkbox' || _type == 'radio')
+                          return this.value != this.defaultChecked
+                     }).serialize();
+
         $.ajax({
           method: _url.type,
           url: _url.url,
           dataType: 'json',
-          data: $this.serialize(),
+          data: _data,
+          error: function (xhr) {
+            plugin.error(xhr.status, $this);
+          },
           beforeSend: function () {
             plugin.removeErrors($this);
           },
@@ -265,6 +297,9 @@
             url: $this.attr('data-href'),
             dataType: 'json',
             type: 'DELETE',
+            error: function (xhr) {
+              plugin.error(xhr.status, false, true);
+            },
             success: function (data) {
               plugin.log(data);
               if (data.success == true) {
@@ -274,6 +309,34 @@
           });
         }
         this.callback('onDel');
+        return this;
+      },
+
+      render: function () {
+        var plugin = this;
+        $.ajax({
+          method: 'GET',
+          url: this.listUrl(),
+          dataType: 'json',
+          beforeSend: function () {
+            plugin.loading();
+          },
+          error: function (xhr) {
+            plugin.error(xhr.status, false, true);
+          },
+          complete: function () {
+            plugin.loaded();
+          },
+          success: function (data) {
+            plugin.log(data.results);
+            if (data.success == true) {
+              if(data.results.total > 0){
+                plugin.renderTemplate(data, plugin.settings.templates.row).save();
+              } else plugin.renderTemplate(false, plugin.settings.templates.noresults).save();
+            } else plugin.error(data.errors);
+          }
+        });
+        this.callback('onRender');
         return this;
       },
 
@@ -313,7 +376,8 @@
         return this;
       },
 
-      error: function (message, target) {
+      error: function (message, target, close) {
+        if(close) $('.modal').modal('hide');
         this.alert(this.style('alert','alert_danger'), message, target).callback('onError');
         return this;
       },
@@ -394,34 +458,6 @@
                       : this.settings[base];
       },
      
-      render: function () {
-        var $this = this;
-        $.ajax({
-          method: 'GET',
-          url: this.listUrl(),
-          dataType: 'json',
-          beforeSend: function () {
-            $this.loading();
-          },
-          complete: function () {
-            $this.loaded();
-          },
-          success: function (data) {
-            $this.log(data.results);
-
-            if (data.success == true) {
-              console.log(data.results.total);
-              if(data.results.total > 0){
-                $this.renderTemplate(data, $this.settings.templates.row).save();
-              } else $this.renderTemplate(false, $this.settings.templates.noresults).save();
-              
-            } else $this.error(data.errors);
-          }
-        });
-        this.callback('onRender');
-        return this;
-      },
-
       saveLocalStorage: function (vr, vl) {
         localStorage.setItem(this.settings.slug + '_' + vr, vl);
         return this;
@@ -519,6 +555,7 @@
 
       doCreateRead: function(data){
         $(this.element).find(this.setting('selectors', 'update')).empty().html($.templates(this.setting('templates', 'create_edit')).render(data));
+
         return this;
       }
 
