@@ -476,8 +476,16 @@
       processUpdate: function (_this, data) {
         this.log(data);
         if (data.success == true) {
-          this.render();
-          this.success(this.settings.lang.saved, this.settings.selectors.modal)
+          $('input', _this).each(function () {
+            var _type = this.type;
+            if(_type == 'text' || _type == 'textarea'){
+              this.defaultValue = this.value
+            } else if(_type = 'select'){
+              this.defaultSelected = this.selected
+            } else if(_type = 'checkbox' || _type == 'radio')
+               this.defaultChecked = this.checked
+         });
+          this.render().success(this.settings.lang.saved, this.settings.selectors.modal);
         } else if (typeof data.errors == 'object') {
           this.validation(_this, data);
         } else if (data.errors) this.error(data.errors);
