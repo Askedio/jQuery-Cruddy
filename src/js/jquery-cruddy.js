@@ -240,13 +240,8 @@
     /* TO-DO: combine to ajax helper */
       read: function ($this) {
         var plugin = this;
-        $.ajax({
-          method: 'GET',
+        plugin.ajax({
           url: $this.attr('data-href'),
-          dataType: 'json',
-          error: function (xhr) {
-            plugin.error(xhr.status, false, true);
-          },
           success: function (data) {
             plugin.log(data);
             if (data.success == true) {
@@ -258,6 +253,7 @@
         return this;
       },
 
+// doesnt work for create
       update: function ($this) {
         var plugin = this,
           _url     = this.updateUrl($this),
@@ -271,14 +267,10 @@
                           return this.value != this.defaultChecked
                      }).serialize();
 
-        $.ajax({
+        plugin.ajax({
           method: _url.type,
           url: _url.url,
-          dataType: 'json',
           data: _data,
-          error: function (xhr) {
-            plugin.error(xhr.status, $this);
-          },
           beforeSend: function () {
             plugin.removeErrors($this);
           },
@@ -293,13 +285,9 @@
       del: function ($this) {
         var plugin = this;
         if (confirm(this.settings.lang.confirm)) {
-          $.ajax({
+          plugin.ajax({
             url: $this.attr('data-href'),
-            dataType: 'json',
-            type: 'DELETE',
-            error: function (xhr) {
-              plugin.error(xhr.status, false, true);
-            },
+            method: 'DELETE',
             success: function (data) {
               plugin.log(data);
               if (data.success == true) {
@@ -314,15 +302,10 @@
 
       render: function () {
         var plugin = this;
-        $.ajax({
-          method: 'GET',
+        plugin.ajax({
           url: this.listUrl(),
-          dataType: 'json',
           beforeSend: function () {
             plugin.loading();
-          },
-          error: function (xhr) {
-            plugin.error(xhr.status, false, true);
           },
           complete: function () {
             plugin.loaded();
@@ -341,6 +324,31 @@
       },
 
     /* plugin functions */
+      ajax: function (options) {
+        var plugin = this;
+        var defaults = {
+          method:      'GET',
+          dataType:    'json',
+          error: function (xhr) {
+            plugin.error(xhrError(xhr), false, true);
+          }
+        },
+        settings = $.extend({}, defaults, options);
+
+        $.ajax({
+          method: settings.method,
+          url: settings.url,
+          dataType: settings.dataType,
+          beforeSend: settings.beforeSend,
+          error: settings.error,
+          complete: settings.complete,
+          success: settings.success
+        });
+
+        this.callback('onAjax');
+        return this;
+      },
+
       callback: function (action) {
         if (typeof this.settings[action] === 'undefined') return false;
         var onComplete = this.settings[action];
@@ -349,6 +357,10 @@
           onComplete.call(this.element);
         }
       },
+
+      xhrError: function (xhr) {
+        return xhr.status;
+      }, 
 
       save: function () {
         /* TO-DO: convert to object and loop */
