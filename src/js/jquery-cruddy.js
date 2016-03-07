@@ -339,6 +339,7 @@
           method: settings.method,
           url: settings.url,
           dataType: settings.dataType,
+          data: settings.data,
           beforeSend: settings.beforeSend,
           error: settings.error,
           complete: settings.complete,
