@@ -266,6 +266,8 @@
                         } else if(_type = 'checkbox' || _type == 'radio')
                           return this.value != this.defaultChecked
                      }).serialize();
+        
+        $(plugin.style('alert','base', true)).hide();
 
         plugin.ajax({
           method: _url.type,
