@@ -528,7 +528,7 @@
 
           setTimeout(function(){
             plugin.success(plugin.lang('saved'), plugin.settings.selectors.modal);
-          }, 250);
+          }, 500);
 
         } else if (typeof data.errors == 'object') {
           this.validation(_this, data);
