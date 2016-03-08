@@ -4,7 +4,7 @@
  * clean up names of variables/functions
  * clean up 'helpers' to get lang, setting, selector, style this.setting('selectors.modal')
  * clean up css/id variables being used to be more uniform - cruddy-## or something
-  *
+ *
 */
 
 ;
@@ -269,6 +269,7 @@
       },
 
       update: function ($this) {
+        /* TO-DO: move data to its own function */
         var plugin = this,
           _url     = this.updateUrl($this),
           _data    = $('input', $this).filter(function () {
@@ -329,9 +330,9 @@
             plugin.loaded();
           },
           success: function (data) {
-            plugin.log(data.results);
+            plugin.log(data.data);
             if (data.success == true) {
-              if(data.results.total > 0){
+              if(data.data.total > 0){
                 plugin.renderTemplate(data, plugin.settings.templates.row).save();
               } else plugin.renderTemplate(false, plugin.settings.templates.noresults).save();
             } else plugin.error(data.errors);
@@ -453,9 +454,9 @@
       },
 
       renderTemplate: function (data, tpl) {
-        var _data = data ? data.results.data : false;
+        var _data = data ? data.data.data : false;
         $(this.element).find(this.style('tbody')).html($.templates(tpl).render(_data));
-        if(_data) $(this.element).find(this.style('pagination', '', true)).html($.templates(this.settings.templates.pagination).render(data.results));
+        if(_data) $(this.element).find(this.style('pagination', '', true)).html($.templates(this.settings.templates.pagination).render(data.data));
         return this.callback('onRenderTemplate', {
           data: data,
           tpl:  tpl
@@ -529,7 +530,7 @@
         this.log(data);
 
         if (data.success == true) {
-          this.read($(_this).attr('action') + '/' + data.results.id).render();
+          this.read($(_this).attr('action') + '/' + data.data.id).render();
 
           setTimeout(function(){
             plugin.success(plugin.lang('saved'), plugin.settings.selectors.modal);
@@ -607,7 +608,7 @@
       },
 
       triggerRead: function (data) {
-        return this.doCreateRead(data.results).callback('onTriggerRead', data);
+        return this.doCreateRead(data.data).callback('onTriggerRead', data);
       },
 
       doCreateRead: function(data){
