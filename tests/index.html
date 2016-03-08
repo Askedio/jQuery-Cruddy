@@ -31,6 +31,35 @@
    <div class="row">
       <div class="col-md-12">
 
+
+
+        <div id="modal-alert" class="modal fade" role="dialog">
+          <div class="modal-dialog">
+          <script id="modal-alert" type="text/x-jsrender">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">
+                  {{ :title }}
+                </h4>
+              </div>
+              <div class="modal-body">
+                {{ :body }}
+              </div>
+              <div class="modal-footer">
+                {{ :footer }}
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </script>
+          </div>
+        </div>
+
+
+
+
+
+
         <div id="modal-create-edit" class="modal fade" role="dialog">
           <div class="modal-dialog">
           <script id="create-edit" type="text/x-jsrender">
@@ -187,7 +216,7 @@
 
 <h2>To-do:</h2>
 <ul>
-  <li>Alert template for confirms or w/e</li>
+  <li>create user needs to switch to edit user, or close (opt)</li>
 <ul>
 
 
@@ -197,7 +226,7 @@
 <script src="../src/js/jquery-cruddy.js"></script>
 
 <script>
-  $('.container-user').cruddy({'onLog': function(data){console.log(data)}});
+  $('.container-user').cruddy({'onLog': function($this, data){console.log(data)}});
 </script>
 </body>
 </html>

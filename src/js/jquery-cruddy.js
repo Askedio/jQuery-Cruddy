@@ -95,7 +95,12 @@
         id:           '',
         name:         '',
         email:        ''
+     },
+
+     onConfirm:    function($this, string){
+       return confirm(string);
      }
+
     };
 
   function Plugin(element, options) {
@@ -289,9 +294,13 @@
         return this.callback('onUpdate', $this);
       },
 
+      confirm: function (string) {
+        return this.callback('onConfirm', string);
+      },
+
       del: function ($this) {
         var plugin = this;
-        if (confirm(plugin.lang('confirm'))) {
+        if (plugin.confirm(plugin.lang('confirm'))) {
           plugin.ajax({
             url: $this.attr('data-href'),
             method: 'DELETE',
@@ -356,8 +365,8 @@
 
       callback: function (action, data) {
         if (typeof this.settings[action] === 'undefined') return this;
-        var onComplete = this.settings[action];
-        if (typeof onComplete === 'function') onComplete.call(this.element, data);
+        var _function = this.settings[action];
+        if (typeof _function === 'function') return _function.call(this.element, this, data);
         return this;
       },
 
