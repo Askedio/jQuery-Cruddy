@@ -97,7 +97,7 @@
         email:        ''
      },
 
-     onConfirm:    function($this, string){
+     onConfirm:    function($this, string, $ele){
        return confirm(string);
      }
 
@@ -183,7 +183,7 @@
         /* read */
         $(this.element).on('click', plugin.settings.selectors.read, function (e) {
           e.preventDefault();
-          plugin.read.call(plugin, $(this));
+          plugin.read.call(plugin, $(this).attr('data-href'));
         });
 
         /* update */
@@ -251,10 +251,10 @@
       },
      
     /* ajax calls */
-      read: function ($this) {
+      read: function (url) {
         var plugin = this;
         plugin.ajax({
-          url: $this.attr('data-href'),
+          url: url,
           success: function (data) {
             plugin.log(data);
             if (data.success == true) {
@@ -262,7 +262,7 @@
             } else plugin.error(data.errors);
           }
         });
-        return this.callback('onRead', $this);
+        return this.callback('onRead', url);
       },
 
       update: function ($this) {
@@ -300,7 +300,7 @@
 
       del: function ($this) {
         var plugin = this;
-        if (plugin.confirm(plugin.lang('confirm'))) {
+        if (plugin.confirm(plugin.lang('confirm'), $this)) {
           plugin.ajax({
             url: $this.attr('data-href'),
             method: 'DELETE',
@@ -521,18 +521,17 @@
       },
 
       processUpdate: function (_this, data) {
+        var plugin = this;
+
         this.log(data);
+
         if (data.success == true) {
-          $('input', _this).each(function () {
-            var _type = this.type;
-            if(_type == 'text' || _type == 'textarea'){
-              this.defaultValue = this.value
-            } else if(_type = 'select'){
-              this.defaultSelected = this.selected
-            } else if(_type = 'checkbox' || _type == 'radio')
-               this.defaultChecked = this.checked
-         });
-          this.render().success(this.lang('saved'), this.settings.selectors.modal);
+          this.read($(_this).attr('action') + '/' + data.results.id).render();
+
+          setTimeout(function(){
+            plugin.success(plugin.lang('saved'), plugin.settings.selectors.modal);
+          }, 250);
+
         } else if (typeof data.errors == 'object') {
           this.validation(_this, data);
         } else if (data.errors) this.error(data.errors);
