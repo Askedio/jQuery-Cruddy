@@ -216,32 +216,32 @@
       },
 
       refresh: function ($this) {
-        this.render().callback('onRefresh');
+        this.render().callback('onRefresh', $this);
         return this;
       },
 
       pagination: function ($this) {
-        this.setUrl($this.attr('data-href')).render().callback('onPagination');
+        this.setUrl($this.attr('data-href')).render().callback('onPagination', $this);
         return this;
       },
 
       limit: function ($this) {
-        this.setUrl().setLimit($this.val()).render().callback('onLimit');
+        this.setUrl().setLimit($this.val()).render().callback('onLimit', $this);
         return this;
       },
 
       search: function ($this) {
-        this.setUrl().setSearch($this.find(this.settings.selectors.search_field).val()).render().callback('onSearch');
+        this.setUrl().setSearch($this.find(this.settings.selectors.search_field).val()).render().callback('onSearch', $this);
         return this;
       },
 
       sort: function ($this) {
-        this.setSort($this.attr('data-col')).sortStyle($this, this.settings.list.direction).setDirection(this.settings.list.direction == 'asc' ? 'desc' : 'asc').render().callback('onSort');
+        this.setSort($this.attr('data-col')).sortStyle($this, this.settings.list.direction).setDirection(this.settings.list.direction == 'asc' ? 'desc' : 'asc').render().callback('onSort', $this);
         return this;
       },
 
       create: function ($this) {
-        this.triggerCreate($this).callback('onCreate');
+        this.triggerCreate($this).callback('onCreate', $this);
         return this;
       },
      
@@ -257,7 +257,7 @@
             } else plugin.error(data.errors);
           }
         });
-        return this.callback('onRead');
+        return this.callback('onRead', $this);
       },
 
       update: function ($this) {
@@ -286,7 +286,7 @@
             plugin.processUpdate($this, data);
           }
         });
-        return this.callback('onUpdate');
+        return this.callback('onUpdate', $this);
       },
 
       del: function ($this) {
@@ -303,7 +303,7 @@
             }
           });
         }
-        return this.callback('onDel');
+        return this.callback('onDel', $this);
       },
 
       render: function () {
@@ -351,16 +351,13 @@
           success: settings.success
         });
 
-        return this.callback('onAjax');
+        return this.callback('onAjax', settings);
       },
 
-      callback: function (action) {
+      callback: function (action, data) {
         if (typeof this.settings[action] === 'undefined') return this;
         var onComplete = this.settings[action];
-
-        if (typeof onComplete === 'function') {
-          onComplete.call(this.element);
-        }
+        if (typeof onComplete === 'function') onComplete.call(this.element, data);
         return this;
       },
 
@@ -391,14 +388,18 @@
       },
 
       success: function (message, target) {
-        this.alert(this.style('alert','alert_success'), message, target).callback('onSuccess');
-        return this.callback('onSuccess');
+        return this.alert(this.style('alert','alert_success'), message, target).callback('onSuccess', {
+          message: message,
+          target:   target
+        });
       },
 
       error: function (message, target, close) {
         if(close) $('.modal').modal('hide');
-        this.alert(this.style('alert','alert_danger'), message, target).callback('onError');
-        return this.callback('onError');
+        return this.alert(this.style('alert','alert_danger'), message, target).callback('onError', {
+          message: message,
+          target:   target
+        });
       },
 
       alert: function (style, message, target) {
@@ -410,44 +411,57 @@
                             this.style('alert','alert_success') + ' ' + this.style('alert','alert_danger')
                             ).addClass(style).html('<strong>' + message + '</strong>').show();
         clearTimeout(this.alert_timeout);
-        this.alert_timeout = setTimeout(function () {
+        this.alert_timeout = setTimeout(function (){
           _alert.hide();
         }, 3000);
-        return this.callback('onAlert');
+        return this.callback('onAlert', {
+          style:   style,
+          message: message,
+          target:  target
+        });
       },
 
       loading: function () {
         $(this.element).find(this.style('refresh','btn_refresh', true)).find(this.style('em')).addClass(this.style('refresh','fa_spin'));
-        return this.callback('onLoading');
+        return this.callback('onLoading', $(this.element));
       },
 
       loaded: function () {
         $(this.element).find(this.style('refresh','btn_refresh', true)).find(this.style('em')).removeClass(this.style('refresh','fa_spin'));
-        return this.callback('onLoaded');
+        return this.callback('onLoaded', $(this.element));
       },
 
       sortStyle: function (_this, direction) {
         _this.parents(this.style('thead')).find(this.style('sort', 'em', true)).removeClass(this.style('sort', 'sort_asc') + ' ' + this.style('sort', 'sort_desc')).addClass(this.style('sort', 'fa'));
         _this.find(this.style('sort', 'em', true)).removeClass(this.style('sort', 'fa')).addClass(this.style('sort', 'fa') +'-' + this.settings.list.direction);
-        return this.callback('onSortStyle');
+        return this.callback('onSortStyle', {
+          'this' :   _this,
+          direction: direction
+        });
       },
 
       renderTemplate: function (data, tpl) {
         var _data = data ? data.results.data : false;
         $(this.element).find(this.style('tbody')).html($.templates(tpl).render(_data));
         if(_data) $(this.element).find(this.style('pagination', '', true)).html($.templates(this.settings.templates.pagination).render(data.results));
-        return this.callback('onRenderTemplate');
+        return this.callback('onRenderTemplate', {
+          data: data,
+          tpl:  tpl
+        });
       },
 
       removeErrors: function (_this) {
         _this.find(this.style('error','has_error', true)).removeClass(this.style('error','has_error'));
         _this.find(this.style('error','has_error', true)).addClass(this.style('hide'));
-        return this.callback('onRemoveErrors');
+        return this.callback('onRemoveErrors', _this);
       },
 
       validation: function (_this, data) {
         this[this.settings.validation](_this, data);
-        return this.callback('onValidation');
+        return this.callback('onValidation', {
+          'this': _this,
+          data:   data
+        });
       },
 
       validateLaravel: function(_this, data) {
@@ -460,7 +474,10 @@
             .removeClass(plugin.style('hide'))
             .find(plugin.style('error','strong')).html(errors.error);
         });
-        return this.callback('onValidateLaravel');
+        return this.callback('onValidateLaravel', {
+          'this': _this,
+          data:   data
+        });
       },
 
     /* helpers */
@@ -472,15 +489,18 @@
       },
 
       lang: function(base, sub){
-       /* TO-DO: clean this up, functionize it and share with the setting lang and template helpers. Vars can be digits, so 0 must be allowed */
-        if(sub != '') return typeof this.settings.lang[base][sub] != 'undefined' ? this.settings.lang[base][sub] : '';
-        if(!sub == '' && typeof this.settings.lang[base] != 'undefined') return this.settings.lang[base];
+        /* TO-DO: still unhappy here, lets do some splits on . (error.404, confirm, some.setting)  and do a check loop to get the string */
+        if(sub != '' && typeof this.settings.lang[base][sub] != 'undefined') return  this.settings.lang[base][sub];
+        if(typeof this.settings.lang[base] != 'undefined') return this.settings.lang[base];
         return '';
       },
      
       saveLocalStorage: function (vr, vl) {
         localStorage.setItem(this.settings.slug + '_' + vr, vl);
-        return this.callback('onSaveLocalStorage');
+        return this.callback('onSaveLocalStorage', {
+          'var': vr,
+          'val': vl
+        });
       },
 
       getLocalStorage: function (vr) {
@@ -488,7 +508,7 @@
       },
 
       log: function (data) {
-        return this.callback('onLog');
+        return this.callback('onLog', data);
       },
 
       processUpdate: function (_this, data) {
@@ -507,7 +527,10 @@
         } else if (typeof data.errors == 'object') {
           this.validation(_this, data);
         } else if (data.errors) this.error(data.errors);
-        return this.callback('onProcessUpdate');
+        return this.callback('onProcessUpdate', {
+          'this': _this,
+          data:   data
+        });
       },
 
       updateUrl: function (_this) {
@@ -519,7 +542,7 @@
           _url += '/' + _patch;
         } else var _type = 'POST';
 
-        this.callback('onUpdateUrl');
+        this.callback('onUpdateUrl', _this);
         return {
           url: _url,
           type: _type
@@ -544,36 +567,36 @@
     /* setters */
       setUrl: function (url) {
         this.list_url = url ? url : this.default_list_url;
-        return this.callback('onSetUrl');
+        return this.callback('onSetUrl', url);
       },
 
       setLimit: function (_limit) {
         this.settings.list.limit = _limit;
-        return this.callback('onSetLimit');
+        return this.callback('onSetLimit', _limit);
       },
 
       setSearch: function (_search) {
         this.settings.list.search = _search;
-        return this.callback('onSetSearch');
+        return this.callback('onSetSearch', _search);
       },
 
       setSort: function (_sort) {
         this.settings.list.sort = _sort;
-        return this.callback('onSetSort');
+        return this.callback('onSetSort', _sort);
       },
 
       setDirection: function (_direction) {
         this.settings.list.direction = _direction;
-        return this.callback('onSetDirection');
+        return this.callback('onSetDirection', _direction);
       },
 
     /* triggers */
       triggerCreate: function (_this) {
-        return this.doCreateRead(this.setting('create')).callback('onTriggerCreate');
+        return this.doCreateRead(this.setting('create')).callback('onTriggerCreate', _this);
       },
 
       triggerRead: function (data) {
-        return this.doCreateRead(data.results).callback('onTriggerRead');
+        return this.doCreateRead(data.results).callback('onTriggerRead', data);
       },
 
       doCreateRead: function(data){
@@ -582,7 +605,7 @@
                     .html(  
                       $.templates(this.setting('templates', 'create_edit')).render(data)
                     );
-        return this.callback('onDoCreateRead');
+        return this.callback('onDoCreateRead', data);
       }
 
   });
