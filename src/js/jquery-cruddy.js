@@ -1,7 +1,10 @@
 /* TO-DO:
  *
  * cache selectors 
- *
+ * clean up names of variables/functions
+ * clean up 'helpers' to get lang, setting, selector, style this.setting('selectors.modal')
+ * clean up css/id variables being used to be more uniform - cruddy-## or something
+  *
 */
 
 ;
