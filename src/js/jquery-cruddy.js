@@ -73,7 +73,11 @@
         saved:        'Saved',
         deleted:      'Deleted',
         confirm:      'Are you sure?',
-        failed:       'Request failed!'
+        failed:       'Request failed!',
+        errors:       {
+                        500: 'Unable to process data.',
+                        404: 'Resource not found.'
+                      }
       },
 
       list: {
@@ -105,6 +109,7 @@
         this.localStorage();
         this.$element = $(this.element);
         this.bindEvents().render();
+        this.callback('onInit');
       },
 
       localSettings: function () {
@@ -188,8 +193,7 @@
           plugin.autofocus(this);
         });
        
-        this.callback('onBindEvents');
-        return this;
+        return this.callback('onBindEvents');
       },
 
       unbindEvents: function () {
@@ -237,7 +241,6 @@
       },
      
     /* ajax calls */
-    /* TO-DO: combine to ajax helper */
       read: function ($this) {
         var plugin = this;
         plugin.ajax({
@@ -249,11 +252,9 @@
             } else plugin.error(data.errors);
           }
         });
-        this.callback('onRead');
-        return this;
+        return this.callback('onRead');
       },
 
-// doesnt work for create
       update: function ($this) {
         var plugin = this,
           _url     = this.updateUrl($this),
@@ -280,26 +281,24 @@
             plugin.processUpdate($this, data);
           }
         });
-        this.callback('onUpdate');
-        return this;
+        return this.callback('onUpdate');
       },
 
       del: function ($this) {
         var plugin = this;
-        if (confirm(this.settings.lang.confirm)) {
+        if (confirm(plugin.lang('confirm'))) {
           plugin.ajax({
             url: $this.attr('data-href'),
             method: 'DELETE',
             success: function (data) {
               plugin.log(data);
               if (data.success == true) {
-                plugin.render().success(plugin.settings.lang.deleted)
+                plugin.render().success(plugin.lang('deleted'))
               } else plugin.error(data.errors);
             }
           });
         }
-        this.callback('onDel');
-        return this;
+        return this.callback('onDel');
       },
 
       render: function () {
@@ -321,8 +320,7 @@
             } else plugin.error(data.errors);
           }
         });
-        this.callback('onRender');
-        return this;
+        return this.callback('onRender');
       },
 
     /* plugin functions */
@@ -332,7 +330,7 @@
           method:      'GET',
           dataType:    'json',
           error: function (xhr) {
-            plugin.error(xhrError(xhr), false, true);
+            plugin.error(plugin.xhrError(xhr), false, true);
           }
         },
         settings = $.extend({}, defaults, options);
@@ -348,21 +346,22 @@
           success: settings.success
         });
 
-        this.callback('onAjax');
-        return this;
+        return this.callback('onAjax');
       },
 
       callback: function (action) {
-        if (typeof this.settings[action] === 'undefined') return false;
+        if (typeof this.settings[action] === 'undefined') return this;
         var onComplete = this.settings[action];
 
         if (typeof onComplete === 'function') {
           onComplete.call(this.element);
         }
+        return this;
       },
 
       xhrError: function (xhr) {
-        return xhr.status;
+        var _message = this.lang('errors', xhr.status);
+        return _message ? _message : xhr.status;
       }, 
 
       save: function () {
@@ -372,8 +371,7 @@
         this.saveLocalStorage('direction', this.settings.list.direction)
         this.saveLocalStorage('search', this.settings.list.search)
         this.saveLocalStorage('list_url', this.list_url)
-        this.callback('onSave');
-        return this;
+        return this.callback('onSave');
       },
 
     /* visual */
@@ -388,13 +386,13 @@
 
       success: function (message, target) {
         this.alert(this.style('alert','alert_success'), message, target).callback('onSuccess');
-        return this;
+        return this.callback('onSuccess');
       },
 
       error: function (message, target, close) {
         if(close) $('.modal').modal('hide');
         this.alert(this.style('alert','alert_danger'), message, target).callback('onError');
-        return this;
+        return this.callback('onError');
       },
 
       alert: function (style, message, target) {
@@ -409,48 +407,41 @@
         this.alert_timeout = setTimeout(function () {
           _alert.hide();
         }, 3000);
-        this.callback('onAlert');
-        return this;
+        return this.callback('onAlert');
       },
 
       loading: function () {
         $(this.element).find(this.style('refresh','btn_refresh', true)).find(this.style('em')).addClass(this.style('refresh','fa_spin'));
-        this.callback('onLoading');
-        return this;
+        return this.callback('onLoading');
       },
 
       loaded: function () {
         $(this.element).find(this.style('refresh','btn_refresh', true)).find(this.style('em')).removeClass(this.style('refresh','fa_spin'));
-        this.callback('onLoaded');
-        return this;
+        return this.callback('onLoaded');
       },
 
       sortStyle: function (_this, direction) {
         _this.parents(this.style('thead')).find(this.style('sort', 'em', true)).removeClass(this.style('sort', 'sort_asc') + ' ' + this.style('sort', 'sort_desc')).addClass(this.style('sort', 'fa'));
         _this.find(this.style('sort', 'em', true)).removeClass(this.style('sort', 'fa')).addClass(this.style('sort', 'fa') +'-' + this.settings.list.direction);
-        this.callback('onSortStyle');
-        return this;
+        return this.callback('onSortStyle');
       },
 
       renderTemplate: function (data, tpl) {
         var _data = data ? data.results.data : false;
         $(this.element).find(this.style('tbody')).html($.templates(tpl).render(_data));
         if(_data) $(this.element).find(this.style('pagination', '', true)).html($.templates(this.settings.templates.pagination).render(data.results));
-        this.callback('onRenderTemplate');
-        return this;
+        return this.callback('onRenderTemplate');
       },
 
       removeErrors: function (_this) {
         _this.find(this.style('error','has_error', true)).removeClass(this.style('error','has_error'));
         _this.find(this.style('error','has_error', true)).addClass(this.style('hide'));
-        this.callback('onRemoveErrors');
-        return this;
+        return this.callback('onRemoveErrors');
       },
 
       validation: function (_this, data) {
         this[this.settings.validation](_this, data);
-        this.callback('onValidation');
-        return this;
+        return this.callback('onValidation');
       },
 
       validateLaravel: function(_this, data) {
@@ -463,29 +454,36 @@
             .removeClass(plugin.style('hide'))
             .find(plugin.style('error','strong')).html(errors.error);
         });
-        return this;
+        return this.callback('onValidateLaravel');
       },
 
     /* helpers */
       setting: function(base, sub){
+       if(typeof this.settings[base] == 'undefined' || (sub && typeof this.settings[base][sub] == 'undefined')) return '';
        return sub
                       ? this.settings[base][sub]
                       : this.settings[base];
       },
+
+      lang: function(base, sub){
+       /* TO-DO: clean this up, functionize it and share with the setting lang and template helpers */
+       if(typeof this.settings.lang[base] == 'undefined' || (sub && typeof this.settings.lang[base][sub] == 'undefined')) return '';
+       return sub
+                      ? this.settings.lang[base][sub]
+                      : this.settings.lang[base];
+      },
      
       saveLocalStorage: function (vr, vl) {
         localStorage.setItem(this.settings.slug + '_' + vr, vl);
-        return this;
+        return this.callback('onSaveLocalStorage');
       },
 
       getLocalStorage: function (vr) {
         return localStorage.getItem(this.settings.slug + '_' + vr);
-        return this;
       },
 
       log: function (data) {
-        this.callback('onLog');
-        return this;
+        return this.callback('onLog');
       },
 
       processUpdate: function (_this, data) {
@@ -500,12 +498,11 @@
             } else if(_type = 'checkbox' || _type == 'radio')
                this.defaultChecked = this.checked
          });
-          this.render().success(this.settings.lang.saved, this.settings.selectors.modal);
+          this.render().success(this.lang('saved'), this.settings.selectors.modal);
         } else if (typeof data.errors == 'object') {
           this.validation(_this, data);
         } else if (data.errors) this.error(data.errors);
-        this.callback('onProcessUpdate');
-        return this;
+        return this.callback('onProcessUpdate');
       },
 
       updateUrl: function (_this) {
@@ -578,7 +575,6 @@
 
       doCreateRead: function(data){
         $(this.element).find(this.setting('selectors', 'update')).empty().html($.templates(this.setting('templates', 'create_edit')).render(data));
-
         return this;
       }
 
