@@ -224,33 +224,27 @@
       },
 
       refresh: function ($this) {
-        this.render().callback('onRefresh', $this);
-        return this;
+        return this.render().callback('onRefresh', $this);
       },
 
       pagination: function ($this) {
-        this.setUrl($this.attr('data-href')).render().callback('onPagination', $this);
-        return this;
+        return this.setUrl($this.attr('data-href')).render().callback('onPagination', $this);
       },
 
       limit: function ($this) {
-        this.setUrl().setLimit($this.val()).render().callback('onLimit', $this);
-        return this;
+        return this.setUrl().setLimit($this.val()).render().callback('onLimit', $this);
       },
 
       search: function ($this) {
-        this.setUrl().setSearch($this.find(this.settings.selectors.search_field).val()).render().callback('onSearch', $this);
-        return this;
+        return this.setUrl().setSearch($this.find(this.settings.selectors.search_field).val()).render().callback('onSearch', $this);
       },
 
       sort: function ($this) {
-        this.setSort($this.attr('data-col')).sortStyle($this, this.settings.list.direction).setDirection(this.settings.list.direction == 'asc' ? 'desc' : 'asc').render().callback('onSort', $this);
-        return this;
+        return this.setSort($this.attr('data-col')).sortStyle($this, this.settings.list.direction).setDirection(this.settings.list.direction == 'asc' ? 'desc' : 'asc').render().callback('onSort', $this);
       },
 
       create: function ($this) {
-        this.triggerCreate($this).callback('onCreate', $this);
-        return this;
+        return this.triggerCreate($this).callback('onCreate', $this);
       },
      
     /* ajax calls */
