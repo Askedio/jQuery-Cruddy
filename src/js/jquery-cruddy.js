@@ -17,7 +17,7 @@
       autofocus:      true,
 
       templates: {
-        noresults :  '#no-results',
+        noresults :   '#no-results',
         create_edit:  '#create-edit',
         pagination:   '#list-pagination',
         row:          '#row-item'
@@ -52,16 +52,19 @@
           alert_success:    'alert-success',
           alert_danger:     'alert-danger'
         },
+
         refresh: {
           btn_refresh:      'btn-refresh',
           fa_spin:          'fa-spin'
         },
+
         sort: {
           em:               'em-sort',
           fa:               'fa-sort',
           sort_asc:         'fa-sort-asc',
           sort_desc:        'fa-sort-desc'
         },
+
         error: {
           has_error:        'has-error',
           help_block:       'help-block',
@@ -75,8 +78,9 @@
         confirm:      'Are you sure?',
         failed:       'Request failed!',
         errors:       {
-                        500: 'Unable to process data.',
-                        404: 'Resource not found.'
+                        default:     'There was an error.',
+                        500:         'Unable to process.',
+                        404:         'Resource not found.'
                       }
       },
 
@@ -210,6 +214,7 @@
         }, 200);
         return this;
       },
+
       refresh: function ($this) {
         this.render().callback('onRefresh');
         return this;
@@ -360,8 +365,9 @@
       },
 
       xhrError: function (xhr) {
+        if(xhr.readyState == 0) xhr.status = 404;
         var _message = this.lang('errors', xhr.status);
-        return _message ? _message : xhr.status;
+        return _message ? _message : this.lang('errors', 'default');
       }, 
 
       save: function () {
@@ -466,11 +472,10 @@
       },
 
       lang: function(base, sub){
-       /* TO-DO: clean this up, functionize it and share with the setting lang and template helpers */
-       if(typeof this.settings.lang[base] == 'undefined' || (sub && typeof this.settings.lang[base][sub] == 'undefined')) return '';
-       return sub
-                      ? this.settings.lang[base][sub]
-                      : this.settings.lang[base];
+       /* TO-DO: clean this up, functionize it and share with the setting lang and template helpers. Vars can be digits, so 0 must be allowed */
+        if(sub != '') return typeof this.settings.lang[base][sub] != 'undefined' ? this.settings.lang[base][sub] : '';
+        if(!sub == '' && typeof this.settings.lang[base] != 'undefined') return this.settings.lang[base];
+        return '';
       },
      
       saveLocalStorage: function (vr, vl) {
@@ -526,7 +531,7 @@
       },
 
       listLaravel: function () {
-       /* TO-DO: move variables to settings so they can be defined */
+       /* TO-DO: move variables to settings so they can be defined, how to customize w/o new function? custom list? inline callbacks? */
         var _url = this.list_url;
         _url += (_url.indexOf('?') > -1) ? '&' : '?page=1';
         if (this.settings.list.search) _url += '&search=' + encodeURIComponent(this.settings.list.search);
@@ -539,43 +544,45 @@
     /* setters */
       setUrl: function (url) {
         this.list_url = url ? url : this.default_list_url;
-        return this;
+        return this.callback('onSetUrl');
       },
 
       setLimit: function (_limit) {
         this.settings.list.limit = _limit;
-        return this;
+        return this.callback('onSetLimit');
       },
 
       setSearch: function (_search) {
         this.settings.list.search = _search;
-        return this;
+        return this.callback('onSetSearch');
       },
 
       setSort: function (_sort) {
         this.settings.list.sort = _sort;
-        return this;
+        return this.callback('onSetSort');
       },
 
       setDirection: function (_direction) {
         this.settings.list.direction = _direction;
-        return this;
+        return this.callback('onSetDirection');
       },
 
     /* triggers */
       triggerCreate: function (_this) {
-        this.doCreateRead(this.setting('create')).callback('onTriggerCreate');
-        return this;
+        return this.doCreateRead(this.setting('create')).callback('onTriggerCreate');
       },
 
       triggerRead: function (data) {
-        this.doCreateRead(data.results).callback('onTriggerRead');
-        return this;
+        return this.doCreateRead(data.results).callback('onTriggerRead');
       },
 
       doCreateRead: function(data){
-        $(this.element).find(this.setting('selectors', 'update')).empty().html($.templates(this.setting('templates', 'create_edit')).render(data));
-        return this;
+        $(this.element).find(this.setting('selectors', 'update'))
+                    .empty()
+                    .html(  
+                      $.templates(this.setting('templates', 'create_edit')).render(data)
+                    );
+        return this.callback('onDoCreateRead');
       }
 
   });
