@@ -331,7 +331,7 @@
           },
           success: function (data, status, xhr) {
             plugin.log(data);
-            if(data.meta.total_pages > 0){
+            if(data.meta.total > 0){
               plugin.renderTemplate(data, plugin.settings.templates.row).save();
             } else plugin.renderTemplate(false, plugin.settings.templates.noresults).save();
           }
@@ -586,8 +586,7 @@
         var _url = this.list_url;
         _url += (_url.indexOf('?') > -1) ? '&' : '?page=1';
         if (this.settings.list.search) _url += '&search=' + encodeURIComponent(this.settings.list.search);
-        _url += '&sort=' + this.settings.list.sort;
-        _url += '&direction=' + this.settings.list.direction;
+        _url += '&sort=' + (this.settings.list.direction == 'desc' ? '-' : '') + this.settings.list.sort;
         _url += '&limit=' + this.settings.list.limit;
         return _url;
       },
