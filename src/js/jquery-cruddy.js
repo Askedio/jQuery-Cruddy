@@ -9,16 +9,15 @@
     // change sort to be json spec, - for asc/desc and field
     // add ability to adjust what fields are shown in the query
 
-switch form validation to error: ajax function trigger on 403 = form validation, maybe stick validation array?
  *
 */
 
 ;
 (function ($, window, document, undefined) {
 
-  "use strict";
+  'use strict';
 
-  var pluginName = "cruddy",
+  var pluginName = 'cruddy',
     defaults = {
       strict:         true,
       slug:           'users',
@@ -274,22 +273,23 @@ switch form validation to error: ajax function trigger on 403 = form validation,
         /* TO-DO: move data to its own function */
         var plugin = this,
           _url     = this.updateUrl($this),
-          _data    = $('input', $this).filter(function () {
-                        var _type = this.type;
-                        if(_type == 'text' || _type == 'textarea'){
-                          return this.value != this.defaultValue
-                        } else if(_type = 'select'){
-                          return this.value != this.defaultSelected
-                        } else if(_type = 'checkbox' || _type == 'radio')
-                          return this.value != this.defaultChecked
-                     }).serialize();
+          _data    = {};
+        $('input', $this).filter(function () {
+            var _type = this.type;
+            if(_type == 'text' || _type == 'textarea'){
+              if(this.value != this.defaultValue) _data[this.name] = this.value;
+            } else if(_type = 'select'){
+              if(this.value != this.defaultSelected) _data[this.name] = this.value;
+            } else if(_type = 'checkbox' || _type == 'radio')
+              if(this.value != this.defaultChecked) _data[this.name] = this.value;
+         }).serializeArray();
+
         
         $(plugin.style('alert','base', true)).hide();
-
         plugin.ajax({
           method: _url.type,
           url: _url.url,
-          data: _data,
+          data: JSON.stringify(_data),
           beforeSend: function () {
             plugin.removeErrors($this);
           },
@@ -640,8 +640,8 @@ switch form validation to error: ajax function trigger on 403 = form validation,
 
   $.fn[pluginName] = function (options) {
     return this.each(function () {
-      if (!$.data(this, "plugin_" + pluginName)) {
-        $.data(this, "plugin_" +
+      if (!$.data(this, 'plugin_' + pluginName)) {
+        $.data(this, 'plugin_' +
           pluginName, new Plugin(this, options));
       }
     });
