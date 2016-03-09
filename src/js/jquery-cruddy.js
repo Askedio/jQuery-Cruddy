@@ -9,6 +9,7 @@
     // change sort to be json spec, - for asc/desc and field
     // add ability to adjust what fields are shown in the query
 
+switch form validation to error: ajax function trigger on 403 = form validation, maybe stick validation array?
  *
 */
 
@@ -85,12 +86,12 @@
         saved:        'Saved',
         deleted:      'Deleted',
         confirm:      'Are you sure?',
-        failed:       'Request failed!',
         errors:       {
-                        default:     'There was an error.',
-                        500:         'Unable to process.',
-                        404:         'Resource not found.',
-                        415:         'Unsupported Media Type'
+                        default:     'Error',
+                        500:         'Internal Server Error',
+                        404:         'Not Found',
+                        415:         'Unsupported Media Type',
+                        406:         'Not Acceptable'
                       }
       },
 
@@ -263,9 +264,7 @@
           url: url,
           success: function (data) {
             plugin.log(data);
-            if (typeof data.errors === 'undefined') {
-              plugin.triggerRead(data);
-            } else plugin.error(data.errors);
+            plugin.triggerRead(data);
           }
         });
         return this.callback('onRead', url);
@@ -313,9 +312,7 @@
             method: 'DELETE',
             success: function (data) {
               plugin.log(data);
-              if (typeof data.errors === 'undefined') {
-                plugin.render().success(plugin.lang('deleted'))
-              } else plugin.error(data.errors);
+              plugin.render().success(plugin.lang('deleted'))
             }
           });
         }
@@ -334,11 +331,9 @@
           },
           success: function (data, status, xhr) {
             plugin.log(data);
-            if (!plugin.hasErrors(data, status, xhr)) {
-              if(data.meta.total_pages > 0){
-                plugin.renderTemplate(data, plugin.settings.templates.row).save();
-              } else plugin.renderTemplate(false, plugin.settings.templates.noresults).save();
-            }
+            if(data.meta.total_pages > 0){
+              plugin.renderTemplate(data, plugin.settings.templates.row).save();
+            } else plugin.renderTemplate(false, plugin.settings.templates.noresults).save();
           }
         });
         return this.callback('onRender');
@@ -360,21 +355,21 @@
       }, 
 
       ajax: function (options) {
-        var plugin = this;
-        var defaults = {
-          method:      'GET',
-          dataType:    'json',
-          error: function (xhr) {
-            plugin.error(plugin.xhrError(xhr), false, true);
-          },
-          headers: {
-            'Content-Type': 'application/vnd.api+json',
-            'Accept': 'application/vnd.api+json'
-          }
+        var plugin = this,
+            defaults = {
+              method:      'GET',
+              dataType:    'json',
+              error: function (xhr) {
+                xhr.status == 403 
+                  ? plugin.validation($('.create-edit'), xhr.responseJSON)
+                  : plugin.error(plugin.xhrError(xhr), false, true);
+              },
+              headers: {
+                'Content-Type': 'application/vnd.api+json',
+                'Accept': 'application/vnd.api+json'
+              }
         };
-
         if(!this.settings.strict) defaults.headers = '';
-
 
         var settings = $.extend({}, defaults, options);
 
@@ -505,7 +500,7 @@
 
       validateLaravel: function(_this, data) {
         var plugin = this;
-        $(data.errors).each(function (i, errors) {
+        $(data.errors.detail).each(function (i, errors) {
           _this.find('[name="' + errors.field + '"]')
             .parents(plugin.style('form_group', '', true))
             .addClass(plugin.style('error','has_error'))
@@ -554,17 +549,12 @@
         var plugin = this;
 
         this.log(data);
+        this.read($(_this).attr('action') + '/' + data.data.id).render();
 
-        if (typeof data.errors === 'undefined') {
-          this.read($(_this).attr('action') + '/' + data.data.id).render();
+        setTimeout(function(){
+          plugin.success(plugin.lang('saved'), plugin.settings.selectors.modal);
+        }, 700);
 
-          setTimeout(function(){
-            plugin.success(plugin.lang('saved'), plugin.settings.selectors.modal);
-          }, 500);
-
-        } else if (typeof data.errors === 'object') {
-          this.validation(_this, data);
-        } else if (data.errors) this.error(data.errors);
         return this.callback('onProcessUpdate', {
           'this': _this,
           data:   data
