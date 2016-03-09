@@ -9,6 +9,20 @@
     // change sort to be json spec, - for asc/desc and field
     // add ability to adjust what fields are shown in the query
 
+
+switch form validation to trigger 
+  "errors": [
+    {
+      "status": "422",
+      "source": { "pointer": "/data/attributes/first-name" },
+      "title":  "Invalid Attribute",
+      "detail": "First name must contain at least three characters."
+    }
+
+source = element
+title = response from laravel validation
+
+
  *
 */
 
