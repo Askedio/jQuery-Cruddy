@@ -94,10 +94,12 @@
         search:       ''
       },
 
-      create: {
-        id:           '',
-        name:         '',
-        email:        ''
+      create: { 
+        attributes: {
+          id:           '',
+          name:         '',
+          email:        ''
+        }
      },
 
      onConfirm:    function($this, string, $ele){
@@ -254,7 +256,7 @@
           url: url,
           success: function (data) {
             plugin.log(data);
-            if (data.success == true) {
+            if (typeof data.errors === 'undefined') {
               plugin.triggerRead(data);
             } else plugin.error(data.errors);
           }
@@ -304,7 +306,7 @@
             method: 'DELETE',
             success: function (data) {
               plugin.log(data);
-              if (data.success == true) {
+              if (typeof data.errors === 'undefined') {
                 plugin.render().success(plugin.lang('deleted'))
               } else plugin.error(data.errors);
             }
@@ -324,9 +326,9 @@
             plugin.loaded();
           },
           success: function (data) {
-            plugin.log(data.data);
-            if (data.success == true) {
-              if(data.data.total > 0){
+            plugin.log(data);
+            if (typeof data.errors === 'undefined') {
+              if(data.meta.total_pages > 0){
                 plugin.renderTemplate(data, plugin.settings.templates.row).save();
               } else plugin.renderTemplate(false, plugin.settings.templates.noresults).save();
             } else plugin.error(data.errors);
@@ -448,9 +450,9 @@
       },
 
       renderTemplate: function (data, tpl) {
-        var _data = data ? data.data.data : false;
-        $(this.element).find(this.style('tbody')).html($.templates(tpl).render(_data));
-        if(_data) $(this.element).find(this.style('pagination', '', true)).html($.templates(this.settings.templates.pagination).render(data.data));
+        var _data = data ? data : false;
+        $(this.element).find(this.style('tbody')).html($.templates(tpl).render(_data.data));
+        if(_data) $(this.element).find(this.style('pagination', '', true)).html($.templates(this.settings.templates.pagination).render(data));
         return this.callback('onRenderTemplate', {
           data: data,
           tpl:  tpl
@@ -489,7 +491,7 @@
 
     /* helpers */
       setting: function(base, sub){
-       if(typeof this.settings[base] == 'undefined' || (sub && typeof this.settings[base][sub] == 'undefined')) return '';
+       if(typeof this.settings[base] === 'undefined' || (sub && typeof this.settings[base][sub] === 'undefined')) return '';
        return sub
                       ? this.settings[base][sub]
                       : this.settings[base];
@@ -497,8 +499,8 @@
 
       lang: function(base, sub){
         /* TO-DO: still unhappy here, lets do some splits on . (error.404, confirm, some.setting)  and do a check loop to get the string */
-        if(sub != '' && typeof this.settings.lang[base][sub] != 'undefined') return  this.settings.lang[base][sub];
-        if(typeof this.settings.lang[base] != 'undefined') return this.settings.lang[base];
+        if(sub != '' && typeof this.settings.lang[base][sub] !== 'undefined') return  this.settings.lang[base][sub];
+        if(typeof this.settings.lang[base] !== 'undefined') return this.settings.lang[base];
         return '';
       },
      
@@ -523,14 +525,14 @@
 
         this.log(data);
 
-        if (data.success == true) {
+        if (typeof data.errors === 'undefined') {
           this.read($(_this).attr('action') + '/' + data.data.id).render();
 
           setTimeout(function(){
             plugin.success(plugin.lang('saved'), plugin.settings.selectors.modal);
           }, 500);
 
-        } else if (typeof data.errors == 'object') {
+        } else if (typeof data.errors === 'object') {
           this.validation(_this, data);
         } else if (data.errors) this.error(data.errors);
         return this.callback('onProcessUpdate', {
