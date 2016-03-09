@@ -4,6 +4,11 @@
  * clean up names of variables/functions
  * clean up 'helpers' to get lang, setting, selector, style this.setting('selectors.modal')
  * clean up css/id variables being used to be more uniform - cruddy-## or something
+
+    // just need relations now?
+    // change sort to be json spec, - for asc/desc and field
+    // add ability to adjust what fields are shown in the query
+
  *
 */
 
@@ -14,6 +19,7 @@
 
   var pluginName = "cruddy",
     defaults = {
+      strict:         true,
       slug:           'users',
       validation:     'validateLaravel',
       listtype:       'listLaravel',
@@ -83,7 +89,8 @@
         errors:       {
                         default:     'There was an error.',
                         500:         'Unable to process.',
-                        404:         'Resource not found.'
+                        404:         'Resource not found.',
+                        415:         'Unsupported Media Type'
                       }
       },
 
@@ -325,19 +332,33 @@
           complete: function () {
             plugin.loaded();
           },
-          success: function (data) {
+          success: function (data, status, xhr) {
             plugin.log(data);
-            if (typeof data.errors === 'undefined') {
+            if (!plugin.hasErrors(data, status, xhr)) {
               if(data.meta.total_pages > 0){
                 plugin.renderTemplate(data, plugin.settings.templates.row).save();
               } else plugin.renderTemplate(false, plugin.settings.templates.noresults).save();
-            } else plugin.error(data.errors);
+            }
           }
         });
         return this.callback('onRender');
       },
 
     /* plugin functions */
+      hasErrors: function (data, status, xhr) {
+        var _error = false;
+        if(this.settings.strict && xhr.getResponseHeader('Content-Type') != 'application/vnd.api+json'){
+          _error = this.lang('errors', 415);
+        } else if(typeof data.errors !== 'undefined'){
+          _error = data.errors;
+        }
+
+        if(_error){
+          this.error(_error, false, true);
+          return true;
+        }
+      }, 
+
       ajax: function (options) {
         var plugin = this;
         var defaults = {
@@ -345,9 +366,17 @@
           dataType:    'json',
           error: function (xhr) {
             plugin.error(plugin.xhrError(xhr), false, true);
+          },
+          headers: {
+            'Content-Type': 'application/vnd.api+json',
+            'Accept': 'application/vnd.api+json'
           }
-        },
-        settings = $.extend({}, defaults, options);
+        };
+
+        if(!this.settings.strict) defaults.headers = '';
+
+
+        var settings = $.extend({}, defaults, options);
 
         $.ajax({
           method: settings.method,
@@ -357,7 +386,8 @@
           beforeSend: settings.beforeSend,
           error: settings.error,
           complete: settings.complete,
-          success: settings.success
+          success: settings.success,
+          headers: settings.headers
         });
 
         return this.callback('onAjax', settings);
