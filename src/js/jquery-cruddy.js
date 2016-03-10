@@ -1,30 +1,55 @@
+/*
+  The MIT License (MIT)
+
+  Copyright (c) 2016 William Bowman, gcphost@gmail.com, Asked.io, Cruddy.io
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
+
 /* TO-DO:
  *
  * cache selectors 
  * clean up names of variables/functions
  * clean up 'helpers' to get lang, setting, selector, style this.setting('selectors.modal')
  * clean up css/id variables being used to be more uniform - cruddy-## or something
-
-    // just need relations now?
-    // change sort to be json spec, - for asc/desc and field
-    // add ability to adjust what fields are shown in the query
-
-
-switch form validation to trigger 
-  "errors": [
-    {
-      "status": "422",
-      "source": { "pointer": "/data/attributes/first-name" },
-      "title":  "Invalid Attribute",
-      "detail": "First name must contain at least three characters."
-    }
-
-source = element
-title = response from laravel validation
-
-
- *
+ * abstract API related variables, fields, results, write Laravel helper
+ * 
+ * Switch form validation to trigger 
+ *   "errors": [
+ *     {
+ *       "status": "422",
+ *       "source": { "pointer": "/data/attributes/first-name" },
+ *       "title":  "Invalid Attribute",
+ *       "detail": "First name must contain at least three characters."
+ *     }
+ * 
+ * BUGS/ISSUES
+ * 
+ * POST/PATCH is {name:value} json array for body, not json api spec
+ * My API spec errors are in transition, so are these
+ * 
+ * 
 */
+
+
+
 
 ;
 (function ($, window, document, undefined) {
@@ -33,93 +58,93 @@ title = response from laravel validation
 
   var pluginName = 'cruddy',
     defaults = {
-      strict:         true,                                     /* */
-      slug:           'users',                                  /* */
-      validation:     'validateLaravel',                        /* */
-      listtype:       'listLaravel',                            /* */
-      autofocus:      true,                                     /* */
+      strict:         true,                                     /* force [send|receive] headers to be application/vnd.api+json */
+      slug:           'users',                                  /* slug used to cache local settings like url,sort,search */
+      validation:     'validateLaravel',                        /* the function used to validate form errors */
+      listtype:       'listLaravel',                            /* the function used to generate lists */
+      autofocus:      true,                                     /* auto focus first visible input in modal when [edit|create] */
 
       templates: {
-        noresults :   '#no-results',                            /* */
-        create_edit:  '#create-edit',                           /* */
-        pagination:   '#list-pagination',                       /* */
-        row:          '#row-item'                               /* */
+        noresults :   '#no-results',                            /* the jsrender template for no results */
+        create_edit:  '#create-edit',                           /* the jsrender template for [create|edit] modal */
+        pagination:   '#list-pagination',                       /* the jsrender template for the pagination */
+        row:          '#row-item'                               /* the jsrender template for results */
       },
 
       selectors: {
-        create:       '.btn-create',                            /* */
-        del:          'button[data-action="delete"]',           /* */
-        id:           'input[name="id"]',                       /* */
-        limit:        '[name="limit"]',                         /* */
-        modal:        '#modal-create-edit',                     /* */
-        refresh:      '.btn-refresh',                           /* */
-        pagination:   '.pagination > li > span',                /* */
-        read:         'button[data-action="read"]',             /* */
-        search:       '.search',                                /* */
-        search_field: 'input[name="q"]',                        /* */
-        sort:         'th[data-col]',                           /* */
-        table:        '.table-list',                            /* */
-        update:       '.create-edit'                            /* */
+        create:       '.btn-create',                            /* the button used to trigger the create modal */
+        del:          'button[data-action="delete"]',           /* the button used to delete a list item */
+        id:           'input[name="id"]',                       /* the (hidden) input used to as the id for the user */
+        limit:        '[name="limit"]',                         /* the input used to define the list limit */
+        modal:        '#modal-create-edit',                     /* the modal for [create|edit] */
+        refresh:      '.btn-refresh',                           /* the button used to refresh list data */
+        pagination:   '.pagination > li > span',                /* the paginatied elements used for next/prev */
+        read:         'button[data-action="read"]',             /* the button used to edit a list item */
+        search:       '.search',                                /* the input used for searching the list */
+        search_field: 'input[name="q"]',                        /* .. */
+        sort:         'th[data-col]',                           /* the attibute to use for sorting the list */
+        table:        '.table-list',                            /* the list table */
+        update:       '.create-edit'                            /* the form used in [create|edit] modal */
       },
 
       styles: {
-        tbody:              'table tbody',                      /* */
-        thead:              'thead',                            /* */
-        pagination:         'list-pagination',                  /* */
-        hide:               'hide',                             /* */
-        form_group:         'form-group',                       /* */
-        em:                 'em',                               /* */
+        tbody:              'table tbody',                      /* the lists tbody */
+        thead:              'thead',                            /* the lists thead */
+        pagination:         'list-pagination',                  /* the lists pagination container */
+        hide:               'hide',                             /* invisible elements */
+        form_group:         'form-group',                       /* form item groups */
+        em:                 'em',                               /* used for icons [em|i] */
 
         alert: {
-          base:             'alert-control',                    /* */
-          alert_success:    'alert-success',                    /* */
-          alert_danger:     'alert-danger'                      /* */
+          base:             'alert-control',                    /* base alert */
+          alert_success:    'alert-success',                    /* alert ok */
+          alert_danger:     'alert-danger'                      /* alert not ok */
         },
 
         refresh: {
-          btn_refresh:      'btn-refresh',                      /* */
-          fa_spin:          'fa-spin'                           /* */
+          btn_refresh:      'btn-refresh',                      /* refresh btn */
+          fa_spin:          'fa-spin'                           /* spin */
         },
 
         sort: {
-          em:               'em-sort',                          /* */
-          fa:               'fa-sort',                          /* */
-          sort_asc:         'fa-sort-asc',                      /* */
-          sort_desc:        'fa-sort-desc'                      /* */
+          em:               'em-sort',                          /* use this icon for sort arrow changes */
+          fa:               'fa-sort',                          /* base sort icon */
+          sort_asc:         'fa-sort-asc',                      /* asc icon */
+          sort_desc:        'fa-sort-desc'                      /* desc icon */
         },
 
         error: {
-          has_error:        'has-error',                        /* */
-          help_block:       'help-block',                       /* */
-          strong:           'strong'                            /* */
+          has_error:        'has-error',                        /* form error  */
+          help_block:       'help-block',                       /* form block */
+          strong:           'strong'                            /* element in the error */
         }
       },
 
       lang: {
-        saved:        'Saved',                                  /* */         
-        deleted:      'Deleted',                                /* */
-        confirm:      'Are you sure?',                          /* */
-        errors:       {
-                        default:     'Error',                   /* */
-                        500:         'Internal Server Error',   /* */
-                        404:         'Not Found',               /* */
-                        415:         'Unsupported Media Type',  /* */
-                        406:         'Not Acceptable'           /* */
+        saved:        'Saved',                                  /* alert save */         
+        deleted:      'Deleted',                                /* alert deleted */
+        confirm:      'Are you sure?',                          /* confirm delete */
+        errors:       {                                         /* translate error codes to messages, new json api will be different */
+                        default:     'Error',                   
+                        500:         'Internal Server Error',
+                        404:         'Not Found',
+                        415:         'Unsupported Media Type',
+                        406:         'Not Acceptable'
                       }
       },
 
       list: {
-        direction:    'asc',                                    /* */
-        limit:        10,                                       /* */
-        sort:         'id',                                     /* */
-        search:       ''                                        /* */
+        direction:    'asc',                                    /* default sort direction */
+        limit:        10,                                       /* default limit */
+        sort:         'id',                                     /* default sort id  */
+        search:       ''                                        /* default search  */
       },
 
-      create: { 
+      create: {                                                 /* define data your templates.create_edit requires */
         attributes: {
-          id:           '',                                     /* */
-          name:         '',                                     /* */
-          email:        ''                                      /* */
+          id:           '',
+          name:         '',
+          email:        ''
         }
      },
 
