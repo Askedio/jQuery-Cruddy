@@ -33,93 +33,93 @@ title = response from laravel validation
 
   var pluginName = 'cruddy',
     defaults = {
-      strict:         true,
-      slug:           'users',
-      validation:     'validateLaravel',
-      listtype:       'listLaravel',
-      autofocus:      true,
+      strict:         true,                                     /* */
+      slug:           'users',                                  /* */
+      validation:     'validateLaravel',                        /* */
+      listtype:       'listLaravel',                            /* */
+      autofocus:      true,                                     /* */
 
       templates: {
-        noresults :   '#no-results',
-        create_edit:  '#create-edit',
-        pagination:   '#list-pagination',
-        row:          '#row-item'
+        noresults :   '#no-results',                            /* */
+        create_edit:  '#create-edit',                           /* */
+        pagination:   '#list-pagination',                       /* */
+        row:          '#row-item'                               /* */
       },
 
       selectors: {
-        create:       '.btn-create',
-        del:          'button[data-action="delete"]',
-        id:           'input[name="id"]',
-        limit:        '[name="limit"]',
-        modal:        '#modal-create-edit',
-        refresh:      '.btn-refresh',
-        pagination:   '.pagination > li > span',
-        read:         'button[data-action="read"]',
-        search:       '.search',
-        search_field: 'input[name="q"]',
-        sort:         'th[data-col]',
-        table:        '.table-list',
-        update:       '.create-edit'
+        create:       '.btn-create',                            /* */
+        del:          'button[data-action="delete"]',           /* */
+        id:           'input[name="id"]',                       /* */
+        limit:        '[name="limit"]',                         /* */
+        modal:        '#modal-create-edit',                     /* */
+        refresh:      '.btn-refresh',                           /* */
+        pagination:   '.pagination > li > span',                /* */
+        read:         'button[data-action="read"]',             /* */
+        search:       '.search',                                /* */
+        search_field: 'input[name="q"]',                        /* */
+        sort:         'th[data-col]',                           /* */
+        table:        '.table-list',                            /* */
+        update:       '.create-edit'                            /* */
       },
 
       styles: {
-        tbody:              'table tbody',
-        thead:              'thead',
-        pagination:         'list-pagination',
-        hide:               'hide',
-        form_group:         'form-group',
-        em:                 'em',
+        tbody:              'table tbody',                      /* */
+        thead:              'thead',                            /* */
+        pagination:         'list-pagination',                  /* */
+        hide:               'hide',                             /* */
+        form_group:         'form-group',                       /* */
+        em:                 'em',                               /* */
 
         alert: {
-          base:             'alert-control',
-          alert_success:    'alert-success',
-          alert_danger:     'alert-danger'
+          base:             'alert-control',                    /* */
+          alert_success:    'alert-success',                    /* */
+          alert_danger:     'alert-danger'                      /* */
         },
 
         refresh: {
-          btn_refresh:      'btn-refresh',
-          fa_spin:          'fa-spin'
+          btn_refresh:      'btn-refresh',                      /* */
+          fa_spin:          'fa-spin'                           /* */
         },
 
         sort: {
-          em:               'em-sort',
-          fa:               'fa-sort',
-          sort_asc:         'fa-sort-asc',
-          sort_desc:        'fa-sort-desc'
+          em:               'em-sort',                          /* */
+          fa:               'fa-sort',                          /* */
+          sort_asc:         'fa-sort-asc',                      /* */
+          sort_desc:        'fa-sort-desc'                      /* */
         },
 
         error: {
-          has_error:        'has-error',
-          help_block:       'help-block',
-          strong:           'strong'
+          has_error:        'has-error',                        /* */
+          help_block:       'help-block',                       /* */
+          strong:           'strong'                            /* */
         }
       },
 
       lang: {
-        saved:        'Saved',
-        deleted:      'Deleted',
-        confirm:      'Are you sure?',
+        saved:        'Saved',                                  /* */         
+        deleted:      'Deleted',                                /* */
+        confirm:      'Are you sure?',                          /* */
         errors:       {
-                        default:     'Error',
-                        500:         'Internal Server Error',
-                        404:         'Not Found',
-                        415:         'Unsupported Media Type',
-                        406:         'Not Acceptable'
+                        default:     'Error',                   /* */
+                        500:         'Internal Server Error',   /* */
+                        404:         'Not Found',               /* */
+                        415:         'Unsupported Media Type',  /* */
+                        406:         'Not Acceptable'           /* */
                       }
       },
 
       list: {
-        direction:    'asc',
-        limit:        10,
-        sort:         'id',
-        search:       ''
+        direction:    'asc',                                    /* */
+        limit:        10,                                       /* */
+        sort:         'id',                                     /* */
+        search:       ''                                        /* */
       },
 
       create: { 
         attributes: {
-          id:           '',
-          name:         '',
-          email:        ''
+          id:           '',                                     /* */
+          name:         '',                                     /* */
+          email:        ''                                      /* */
         }
      },
 
