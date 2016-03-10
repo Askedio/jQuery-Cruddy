@@ -1,6 +1,8 @@
 # jQuery-Cruddy
 A CRUD plugin for jQuery &amp; Bootstrap to easily generate tables, create, and edit dialogs
 
+[DOWNLOAD V1](https://github.com/Askedio/jQuery-Cruddy/archive/v1.zip)
+
 [Live Demo](https://cruddy.io/app/)
 
 ![Example](http://i.imgur.com/TY5cutl.png)
@@ -26,7 +28,7 @@ A CRUD plugin for jQuery &amp; Bootstrap to easily generate tables, create, and 
 
 # Template
 
-![Default Template Example](https://raw.githubusercontent.com/Askedio/jQuery-Cruddy/master/tests/index.html)
+[Default Template Example](https://raw.githubusercontent.com/Askedio/jQuery-Cruddy/master/tests/index.html)
 
 data-href=
 
