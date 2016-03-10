@@ -11,6 +11,9 @@ A CRUD plugin for jQuery &amp; Bootstrap to easily generate tables, create, and 
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.rawgit.com/Askedio/jQuery-Cruddy/master/src/css/jquery-cruddy.css" rel="stylesheet">
 
+
+<!-- INSERT TEMPLATE HERE -->
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrender/0.9.73/jsrender.min.js"></script>
@@ -20,6 +23,14 @@ A CRUD plugin for jQuery &amp; Bootstrap to easily generate tables, create, and 
   $('.container-user').cruddy();
 </script>
 ~~~
+
+# Template
+
+![Default Template Example](https://raw.githubusercontent.com/Askedio/jQuery-Cruddy/master/tests/index.html)
+
+data-href=
+
+Look for the data-href=, these are what will be used for your urls - adjust them to match your json api.
 
 # Settings
 ~~~
