@@ -1,9 +1,8 @@
-# jQuery-Cruddy
-A CRUD plugin for jQuery &amp; Bootstrap to easily generate tables, create, and edit dialogs
+![jQuery-CRUDdy](http://i.imgur.com/HkESwNE.jpg)
+An easy to use, templated, CRUD plugin for JSON API. Fully extendable, easy to use. 
 
-[DOWNLOAD V1](https://github.com/Askedio/jQuery-Cruddy/archive/v1.zip)
-
-[Live Demo](https://cruddy.io/app/)
+* [DOWNLOAD V1](https://github.com/Askedio/jQuery-Cruddy/archive/v1.zip)
+* [Live Demo](https://cruddy.io/app/)
 
 ![Example](http://i.imgur.com/TY5cutl.png)
 
