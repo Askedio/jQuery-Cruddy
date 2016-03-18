@@ -31,19 +31,10 @@
  * clean up css/id variables being used to be more uniform - cruddy-## or something
  * abstract API related variables, fields, results, write Laravel helper
  * 
- * Switch form validation to trigger 
- *   "errors": [
- *     {
- *       "status": "422",
- *       "source": { "pointer": "/data/attributes/first-name" },
- *       "title":  "Invalid Attribute",
- *       "detail": "First name must contain at least three characters."
- *     }
  * 
  * BUGS/ISSUES
  * 
  * POST/PATCH is {name:value} json array for body, not json api spec
- * My API spec errors are in transition, so are these
  * 
  * 
 */
@@ -58,7 +49,7 @@
 
   var pluginName = 'cruddy',
     defaults = {
-      strict:         true,                                     /* force [send|receive] headers to be application/vnd.api+json */
+      strict:         true,                                    /* force [send|receive] headers to be application/vnd.api+json */
       slug:           'users',                                  /* slug used to cache local settings like url,sort,search */
       validation:     'validateLaravel',                        /* the function used to validate form errors */
       listtype:       'listLaravel',                            /* the function used to generate lists */
@@ -313,18 +304,19 @@
         var plugin = this,
           _url     = this.updateUrl($this),
           _data    = {};
-        $('input', $this).filter(function () {
-            var _type = this.type;
-            if(_type == 'text' || _type == 'textarea'){
-              if(this.value != this.defaultValue) _data[this.name] = this.value;
-            } else if(_type = 'select'){
-              if(this.value != this.defaultSelected) _data[this.name] = this.value;
-            } else if(_type = 'checkbox' || _type == 'radio')
-              if(this.value != this.defaultChecked) _data[this.name] = this.value;
-         }).serializeArray();
 
-        
+           $('input', $this).filter(function () {
+              var _type = this.type;
+              if(_type == 'text' || _type == 'textarea'){
+                if(this.value != this.defaultValue) _data[this.name] = this.value;
+              } else if(_type = 'select'){
+                if(this.value != this.defaultSelected) _data[this.name] = this.value;
+              } else if(_type = 'checkbox' || _type == 'radio')
+                if(this.value != this.defaultChecked) _data[this.name] = this.value;
+           }).serializeArray();
+
         $(plugin.style('alert','base', true)).hide();
+
         plugin.ajax({
           method: _url.type,
           url: _url.url,
@@ -435,7 +427,7 @@
       },
 
       xhrError: function (xhr) {
-        if(xhr.readyState == 0) xhr.status = 404;
+        if(xhr.readyState == 0) xhr.status = 500;
         var _message = this.lang('errors', xhr.status);
         return _message ? _message : this.lang('errors', 'default');
       }, 
@@ -539,13 +531,13 @@
 
       validateLaravel: function(_this, data) {
         var plugin = this;
-        $(data.errors.detail).each(function (i, errors) {
-          _this.find('[name="' + errors.field + '"]')
+        $(data.errors).each(function (i, errors) {
+          _this.find('[name="' + errors.source.pointer + '"]')
             .parents(plugin.style('form_group', '', true))
             .addClass(plugin.style('error','has_error'))
             .find(plugin.style('error','help_block', true))
             .removeClass(plugin.style('hide'))
-            .find(plugin.style('error','strong')).html(errors.error);
+            .find(plugin.style('error','strong')).html(errors.detail);
         });
         return this.callback('onValidateLaravel', {
           'this': _this,
@@ -623,10 +615,10 @@
       listLaravel: function () {
        /* TO-DO: move variables to settings so they can be defined, how to customize w/o new function? custom list? inline callbacks? */
         var _url = this.list_url;
-        _url += (_url.indexOf('?') > -1) ? '&' : '?page=1';
+        _url += (_url.indexOf('?') > -1) ? '&' : '?page[number]=1';
         if (this.settings.list.search) _url += '&search=' + encodeURIComponent(this.settings.list.search);
         _url += '&sort=' + (this.settings.list.direction == 'desc' ? '-' : '') + this.settings.list.sort;
-        _url += '&limit=' + this.settings.list.limit;
+        _url += '&page[limit]=' + this.settings.list.limit;
         return _url;
       },
 
