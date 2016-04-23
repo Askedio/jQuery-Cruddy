@@ -25,13 +25,13 @@
 
 /* TO-DO:
  *
- * cache selectors 
+ * cache selectors
  * clean up names of variables/functions
  * clean up 'helpers' to get lang, setting, selector, style this.setting('selectors.modal')
  * clean up css/id variables being used to be more uniform - cruddy-## or something
  * abstract API related variables, fields, results, write Laravel helper
- * 
- * Switch form validation to trigger 
+ *
+ * Switch form validation to trigger
  *   "errors": [
  *     {
  *       "status": "422",
@@ -39,13 +39,13 @@
  *       "title":  "Invalid Attribute",
  *       "detail": "First name must contain at least three characters."
  *     }
- * 
+ *
  * BUGS/ISSUES
- * 
+ *
  * POST/PATCH is {name:value} json array for body, not json api spec
  * My API spec errors are in transition, so are these
- * 
- * 
+ *
+ *
 */
 
 
@@ -121,11 +121,11 @@
       },
 
       lang: {
-        saved:        'Saved',                                  /* alert save */         
+        saved:        'Saved',                                  /* alert save */
         deleted:      'Deleted',                                /* alert deleted */
         confirm:      'Are you sure?',                          /* confirm delete */
         errors:       {                                         /* translate error codes to messages, new json api will be different */
-                        default:     'Error',                   
+                        default:     'Error',
                         500:         'Internal Server Error',
                         404:         'Not Found',
                         415:         'Unsupported Media Type',
@@ -252,7 +252,7 @@
         $(this.element).on('shown.bs.modal', '.modal', function () {
           plugin.autofocus(this);
         });
-       
+
         return this.callback('onBindEvents');
       },
 
@@ -266,7 +266,7 @@
       autofocus: function ($this) {
         if(!this.settings.autofocus) return this;
         setTimeout(function(){
-          $('input:text:visible:first', $this).focus();   
+          $('input:text:visible:first', $this).focus();
         }, 200);
         return this;
       },
@@ -294,7 +294,7 @@
       create: function ($this) {
         return this.triggerCreate($this).callback('onCreate', $this);
       },
-     
+
     /* ajax calls */
       read: function (url) {
         var plugin = this;
@@ -323,7 +323,7 @@
               if(this.value != this.defaultChecked) _data[this.name] = this.value;
          }).serializeArray();
 
-        
+
         $(plugin.style('alert','base', true)).hide();
         plugin.ajax({
           method: _url.type,
@@ -391,7 +391,7 @@
           this.error(_error, false, true);
           return true;
         }
-      }, 
+      },
 
       ajax: function (options) {
         var plugin = this,
@@ -399,7 +399,7 @@
               method:      'GET',
               dataType:    'json',
               error: function (xhr) {
-                xhr.status == 403 
+                xhr.status == 403
                   ? plugin.validation($('.create-edit'), xhr.responseJSON)
                   : plugin.error(plugin.xhrError(xhr), false, true);
               },
@@ -438,7 +438,7 @@
         if(xhr.readyState == 0) xhr.status = 404;
         var _message = this.lang('errors', xhr.status);
         return _message ? _message : this.lang('errors', 'default');
-      }, 
+      },
 
       save: function () {
         /* TO-DO: convert to object and loop */
@@ -452,10 +452,10 @@
 
     /* visual */
       style: function(base, sub, p) {
-        var _style = sub 
+        var _style = sub
                       ? this.settings.styles[base][sub]
                       : this.settings.styles[base];
-        return p 
+        return p
              ? '.' + _style
              : _style;
       },
@@ -567,7 +567,7 @@
         if(typeof this.settings.lang[base] !== 'undefined') return this.settings.lang[base];
         return '';
       },
-     
+
       saveLocalStorage: function (vr, vl) {
         localStorage.setItem(this.settings.slug + '_' + vr, vl);
         return this.callback('onSaveLocalStorage', {
@@ -615,7 +615,7 @@
           type: _type
         };
       },
-     
+
       listUrl: function () {
         return this[this.settings.listtype]();
       },
@@ -623,10 +623,10 @@
       listLaravel: function () {
        /* TO-DO: move variables to settings so they can be defined, how to customize w/o new function? custom list? inline callbacks? */
         var _url = this.list_url;
-        _url += (_url.indexOf('?') > -1) ? '&' : '?page=1';
+        _url += (_url.indexOf('?') > -1) ? '&' : '?page[number]=1';
         if (this.settings.list.search) _url += '&search=' + encodeURIComponent(this.settings.list.search);
         _url += '&sort=' + (this.settings.list.direction == 'desc' ? '-' : '') + this.settings.list.sort;
-        _url += '&limit=' + this.settings.list.limit;
+        _url += '&page[size]=' + this.settings.list.limit;
         return _url;
       },
 
@@ -668,7 +668,7 @@
       doCreateRead: function(data){
         $(this.element).find(this.setting('selectors', 'update'))
                     .empty()
-                    .html(  
+                    .html(
                       $.templates(this.setting('templates', 'create_edit')).render(data)
                     );
         return this.callback('onDoCreateRead', data);
